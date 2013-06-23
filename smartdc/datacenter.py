@@ -246,7 +246,7 @@ class DataCenter(object):
             return self.request(method, path, headers=headers, data=data,
                 **kwargs)
         if 400 <= resp.status_code < 499:
-            if resp.content:
+            if resp.content and self.verbose:
                 print(resp.content, file=sys.stderr)
             resp.raise_for_status()
         if resp.content:
@@ -764,7 +764,8 @@ class DataCenter(object):
                 params['networks'] = [networks]
         j, r = self.request('POST', 'machines', data=params)
         if r.status_code >= 400:
-            print(j, file=sys.stderr)
+	    if self.verbose:
+                print(j, file=sys.stderr)
             r.raise_for_status()
         return Machine(datacenter=self, data=j)
     
