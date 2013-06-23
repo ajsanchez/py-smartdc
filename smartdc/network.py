@@ -137,15 +137,8 @@ class Network(object):
 		:py:class:`smartdc.network.Network` from the datacenter
 		and commit the values locally.
 		"""
-		try:
-			self._save(self.datacenter.raw_network_data(self.id))
-		except requests.exceptions.HTTPError, err:
-			# if we try to POST a duplicated subnet, it gets deleted without
-			# further notice instead of getting a 509 error immediately
-			if err.message[:4] == '404 ':
-				self.status = 'error'
-			else:
-				raise
+		data = self.datacenter.raw_network_data(self.id)
+		self._save(data)
 
 	def status(self):
 		"""
