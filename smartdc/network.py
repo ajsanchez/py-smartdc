@@ -1,6 +1,7 @@
 import requests
 import time
 import uuid
+import json
 
 __all__ = ['Network']
 
@@ -95,7 +96,7 @@ class Network(object):
 		self.resolver_ips = data.get('resolver_ips')
 		self.private_gw_ip = data.get('private_gw_ip')
 		self.public_gw_ip = data.get('public_gw_ip')
-		self.status = data.get('status')
+		self.state = data.get('status')
 		
 	@property
 	def path(self):
@@ -153,7 +154,7 @@ class Network(object):
 		returning the :py:attr:`state` as a string.
 		"""
 		self.refresh()
-		return self.status
+		return self.state
 
 	def delete(self):
 		"""
@@ -212,3 +213,40 @@ class Network(object):
 		while self.status() == status:
 			time.sleep(interval)
 
+	def set_outbound(self, enabled):
+		"""
+		::
+
+			PUT /:login/networks/:id/outbound
+
+		:param enabled: new status for the curret network outbound PAT (Port
+			Address Translation).
+		:type enabled: :py:class:`bool`
+
+                :Returns: the updated network outbound PAT (Port Address Translation)
+			status.
+                :rtype: :py:class:`bool`
+		"""
+		assert isinstance(enabled, bool), "Illegal status"
+		j, _ = self.datacenter.request('PUT', self.path + '/outbound',
+			data={ 'enabled': enabled })
+
+		if isinstance(j, basestring): j = json.loads(j) #BUGBUGBUG
+
+		return j['enabled']
+		
+	def get_outbound(self):
+		"""
+		::
+
+			GET /:login/networks/:id/outbound
+
+                :Returns: the current network outbound PAT (Port Address Translation)
+			status.
+                :rtype: :py:class:`bool`
+                """
+		j, _ = self.datacenter.request('GET', self.path + '/outbound')
+
+		if isinstance(j, basestring): j = json.loads(j) #BUGBUGBUG
+
+		return j['enabled']
