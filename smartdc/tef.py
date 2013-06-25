@@ -52,9 +52,6 @@ class TefDataCenter(LegacyDataCenter):
 		if r.status_code >= 400:
 			print(j, file=sys.stderr)
 			r.raise_for_status()
-
-		if isinstance(j, basestring): j = eval(j) #BUGBUGBUG
-
 		return Network(datacenter=self, data=j)
 
 	def raw_network_data(self, network_id):
@@ -75,9 +72,6 @@ class TefDataCenter(LegacyDataCenter):
 			network_id = network_id['id']
 		j, r = self.request('GET', 'networks/' + str(network_id),
 			params=params)
-
-		if isinstance(j, basestring): j = eval(j) #BUGBUGBUG
-
 		return j
 
 	def networks(self, search=None, fields=('name,')):
@@ -98,15 +92,10 @@ class TefDataCenter(LegacyDataCenter):
 		:Returns: network available in this datacenter
 		:rtype: :py:class:`list` of :py:class:`dict`\s
 		"""
-		
 		j, _ = self.request('GET', 'networks')
-
-		if isinstance(j, basestring): j = eval(j) #BUGBUGBUG
-
 		if search:
-			return list(search_dicts(j, search, fields))
-		else:
-			return j
+			j = list(search_dicts(j, search, fields))
+		return [Network(datacenter=self, data=m) for m in j]
 
 	def network(self, identifier):
 		"""
@@ -126,9 +115,6 @@ class TefDataCenter(LegacyDataCenter):
 		if isinstance(identifier, dict):
 			identifier = identifier.get('id')
 		j, _ = self.request('GET', 'networks/' + str(identifier))
-
-		if isinstance(j, basestring): j = eval(j) #BUGBUGBUG
-
 		return j
 
 	def create_machine(self, name=None, package=None, dataset=None,
@@ -218,7 +204,4 @@ class TefDataCenter(LegacyDataCenter):
 			if self.verbose:
 				print(j, file=sys.stderr)
 			r.raise_for_status()
-
-		if isinstance(j, basestring): j = eval(j) #BUGBUGBUG
-
 		return Machine(datacenter=self, data=j)

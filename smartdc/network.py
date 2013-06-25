@@ -69,7 +69,7 @@ class Network(object):
 			dc = str(self.datacenter)
 		else:
 			dc = '<None>'
-		return '<{module}.{cls}: {name} in {dc}'.format(
+		return '<{module}.{cls}: <{name}> in {dc}>'.format(
 			module=self.__module__, cls=self.__class__.__name__,
 			name=self.name, dc=dc)
 
@@ -230,9 +230,6 @@ class Network(object):
 		assert isinstance(enabled, bool), "Illegal status"
 		j, _ = self.datacenter.request('PUT', self.path + '/outbound',
 			data={ 'enabled': enabled })
-
-		if isinstance(j, basestring): j = json.loads(j) #BUGBUGBUG
-
 		return j['enabled']
 		
 	def get_outbound(self):
@@ -246,7 +243,4 @@ class Network(object):
                 :rtype: :py:class:`bool`
                 """
 		j, _ = self.datacenter.request('GET', self.path + '/outbound')
-
-		if isinstance(j, basestring): j = json.loads(j) #BUGBUGBUG
-
 		return j['enabled']

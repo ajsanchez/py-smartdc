@@ -154,7 +154,7 @@ class DataCenter(object):
             user_string = '<{0}> '.format(self.login)
         else:
             user_string = ''
-        return '<{module}.{cls}: {name}at <{loc}>>'.format(
+        return '<{module}.{cls}: {name} at <{loc}>>'.format(
             module=self.__module__, cls=self.__class__.__name__, 
             name=user_string, loc=self.location)
     
@@ -250,8 +250,10 @@ class DataCenter(object):
                 print(resp.content, file=sys.stderr)
             resp.raise_for_status()
         if resp.content:
-            if resp.headers['content-type'] == 'application/json':
-                return (json.loads(resp.content), resp)
+            ctype = re.match('application/json(; +charset *= *([a-zA-z0-9-_]+))? *',
+                resp.headers['content-type'])
+            if ctype:
+                return (json.loads(resp.content, ctype.groups('utf-8')[1]), resp)
             else:
                 return (resp.content, resp)
         else:
