@@ -250,7 +250,7 @@ class DataCenter(object):
                 print(resp.content, file=sys.stderr)
             resp.raise_for_status()
         if resp.content:
-            ctype = re.match('application/json(; +charset *= *([a-zA-z0-9-_]+))? *',
+            ctype = re.match('application/json(; +charset *= *([a-zA-z0-9-_]+))?',
                 resp.headers['content-type'])
             if ctype:
                 return (json.loads(resp.content, ctype.groups('utf-8')[1]), resp)
