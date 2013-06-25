@@ -50,7 +50,8 @@ class TefDataCenter(LegacyDataCenter):
                 params['resolver_ips'] = resolver_ips
         j, r = self.request('POST', 'networks', data=params)
         if r.status_code >= 400:
-            print(j, file=sys.stderr)
+            if self.verbose:
+		print(j, file=sys.stderr)
             r.raise_for_status()
         return Network(datacenter=self, data=j)
 

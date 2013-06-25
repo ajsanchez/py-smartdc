@@ -236,7 +236,7 @@ class DataCenter(object):
         if self.verbose:
             print("%s\t%s\t%s" % 
                 (datetime.now().isoformat(), method, full_path), 
-                file=self.verbose)
+                file=sys.stderr)
         resp = requests.request(method, full_path, auth=self.auth, 
             headers=request_headers, data=jdata,
             verify=self.verify, **kwargs)
@@ -272,7 +272,7 @@ class DataCenter(object):
         if self.verbose:
             print("%s\t%s\t%s" % 
                 (datetime.now().isoformat(), 'GET', self.base_url), 
-                file=self.verbose)
+                file=sys.stderr)
         resp = requests.request('GET', self.base_url, verify=self.verify)
         if 400 <= resp.status_code < 499:
             resp.raise_for_status()

@@ -2,6 +2,7 @@ import requests
 import time
 import uuid
 import json
+import re
 
 __all__ = ['Network']
 
@@ -244,4 +245,94 @@ class Network(object):
         """
         j, _ = self.datacenter.request('GET', self.path + '/outbound')
         return j['enabled']
+
+    def get_inbound_rules(self):
+        """
+        ::
+        
+            GET /:login/networks/:id/inbound
+            
+        :Returns: a list containing all the inbound port forwarding
+            rules for the current Netowrk.
+        :rtype: :py:class:`list` of :py:class:`dict`
+        """
+        j, _ = self.datacenter.request('GET', self.path + '/inbound')
+        return j
+        
+    def add_inbound_rule(self, name, start_port, destination_ip, end_port=None,
+            protocols=None, source_subnet=None, destination_base_port=None):
+        """
+        ::
+        
+            PUT /:login/networks/:id/inbound
+            
+        :param name: the name of the new inbound port forwarding rule
+            to add. Up to 32 letters, digits and hyphens. Required.
+        :type name: :py:class:`basestring`
+        
+        :param start_port: first inbound port to forward according to this
+            rule (0...65535). Required.
+        :type start_port: :py:class:`int`
+        
+        :param end_port: last inbound port to forward according to this rule
+            (0...65535). If ommitted, the `start_port` will be taken.
+        :type end_port: :py:class:`int`
+        
+        :param protocols: list of protocols to forward according to this list.
+            Can be a list of strings or a single value. If omitted, both TCP
+            and UPD will be forwarded.
+        :type protocols: :py:class:`list` or :py:class:`basestring`
+        
+        :param source_subnet: a CIDR specifying the origin of the traffic to
+            be forwarded. If omitted, it will be set to '0.0.0.0/0', thus
+            forwarding all incoming traffic.
+        :type source_subnet: :py:class:`basestring`
+        
+        :param destination_ip: internal IP to which the inbound traffic
+            accepted by this rule should be forwarded to. Required.
+        :type destination_ip: :py:class:`basestring`
+        
+        :param destination_base_port: (first) port of the destination IP to 
+            forward the inbound traffic to (0...65535). If omitted, the 
+            `start_port` will be taken.
+        :type destination_base_port: :py:class:`int`
+        
+        :Returns: a dict containing the new inbound port forwarding rule.
+        :rtype: :py:class:`dict`
+        """
+        params = {}
+        assert re.match(r'[a-zA-Z0-9-_]{1,32}', name), "Illegal name"
+        params['name'] = name
+        assert start_port>=0 and start_port<=65535, "Illegal start_port"
+        params['start_port'] = start_port
+        if end_port:
+            assert end_port>=start_port and end_port<=65535, \
+                    "Illegal end_port"
+        else:
+            end_port = start_port
+        params['end_port'] = end_port
+        if protocols:
+            if isinstance(protocols, basestring):
+                protocols = [protocols]
+        else:
+            protocols = ["tcp", "udp"]
+        params['protocols'] = protocols
+        if source_subnet:
+            assert re.match(r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+(\/[0-9]+)?', \
+                    source_subnet), "Illegal source_subnet"
+            if not source_subnet.find('/'):
+                source_subnet = source_subnet + "/32"
+            params['source_subnet'] = source_subnet
+        assert re.match(r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', destination_ip), \
+                "Illegal destination_ip"
+        params['destination_ip'] = destination_ip
+        if destination_base_port:
+            assert destination_base_port>=0 and destination_base_port<=65535, \
+                    "Illegal destination_base_port"
+        else:
+            destination_base_port = start_port
+        params['destination_base_port'] = destination_base_port
+        j, r = self.datacenter.request('POST', self.path + '/inbound', data=params)
+        r.raise_for_status()
+        return j
 
