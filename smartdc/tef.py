@@ -6,6 +6,22 @@ from .machine import Machine
 import re
 import sys
 
+__all__ = ['TefDataCenter', 'TELEFONICA_LOCATIONS', 'ACENS_LOCATIONS']
+
+TELEFONICA_LOCATIONS = {
+    u'London': u'https://api-eu-lon-1.instantservers.telefonica.com', 
+    u'eu-lon-1': u'https://api-eu-lon-1.instantservers.telefonica.com', 
+    u'Madrid': u'https://api-eu-mad-1.instantservers.telefonica.com',
+    u'eu-mad-1': u'https://api-eu-mad-1.instantservers.telefonica.com',
+}
+
+ACENS_LOCATIONS = {
+    u'London': u'https://api-lon.instantservers.es', 
+    u'lon': u'https://api-lon.instantservers.es', 
+    u'Madrid': u'https://api-mad.instantservers.es',
+    u'mad': u'https://api-mad.instantservers.es',
+}
+
 class TefDataCenter(LegacyDataCenter):
     """
     This class provides support for the network extensiones present
@@ -51,8 +67,8 @@ class TefDataCenter(LegacyDataCenter):
         j, r = self.request('POST', 'networks', data=params)
         if r.status_code >= 400:
             if self.verbose:
-		print(j, file=sys.stderr)
-            r.raise_for_status()
+                print(j, file=sys.stderr)
+        r.raise_for_status()
         return Network(datacenter=self, data=j)
 
     def raw_network_data(self, network_id):

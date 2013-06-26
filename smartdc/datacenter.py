@@ -15,8 +15,7 @@ from ._version import get_versions
 __version__ = get_versions()['version']
 del get_versions
 
-__all__ = ['DataCenter', 'KNOWN_LOCATIONS', 
-            'TELEFONICA_LOCATIONS', 'DEFAULT_LOCATION']
+__all__ = ['DataCenter', 'KNOWN_LOCATIONS', 'DEFAULT_LOCATION']
 
 API_HOST_SUFFIX = '.api.joyentcloud.com'
 
@@ -25,13 +24,6 @@ KNOWN_LOCATIONS = {
     u'us-sw-1':   u'https://us-sw-1.api.joyentcloud.com',
     u'us-west-1': u'https://us-west-1.api.joyentcloud.com',
     u'eu-ams-1':  u'https://eu-ams-1.api.joyentcloud.com',
-}
-
-TELEFONICA_LOCATIONS = {
-    u'London': u'https://api-eu-lon-1.instantservers.telefonica.com', 
-    u'eu-lon-1': u'https://api-eu-lon-1.instantservers.telefonica.com', 
-    u'Madrid': u'https://api-eu-mad-1.instantservers.telefonica.com',
-    u'eu-mad-1': u'https://api-eu-mad-1.instantservers.telefonica.com',
 }
 
 DEFAULT_LOCATION = 'us-west-1'
