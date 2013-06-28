@@ -214,13 +214,13 @@ class Network(object):
         while self.status() == status:
             time.sleep(interval)
 
-    def set_outbound(self, enabled):
+    def set_outbound_status(self, enabled):
         """
         ::
 
             PUT /:login/networks/:id/outbound
 
-        :param enabled: new status for the curret network outbound PAT (Port
+        :param enabled: new status for the current network outbound PAT (Port
             Address Translation).
         :type enabled: :py:class:`bool`
 
@@ -229,11 +229,12 @@ class Network(object):
         :rtype: :py:class:`bool`
         """
         assert isinstance(enabled, bool), "Illegal status"
-        j, _ = self.datacenter.request('PUT', self.path + '/outbound',
+        j, r = self.datacenter.request('PUT', self.path + '/outbound',
             data={ 'enabled': enabled })
+        r.raise_for_status()
         return j['enabled']
         
-    def get_outbound(self):
+    def get_outbound_status(self):
         """
         ::
 
@@ -243,7 +244,8 @@ class Network(object):
             status.
         :rtype: :py:class:`bool`
         """
-        j, _ = self.datacenter.request('GET', self.path + '/outbound')
+        j, r = self.datacenter.request('GET', self.path + '/outbound')
+        r.raise_for_status()
         return j['enabled']
 
     def get_inbound_rules(self):
@@ -335,4 +337,67 @@ class Network(object):
         j, r = self.datacenter.request('POST', self.path + '/inbound', data=params)
         r.raise_for_status()
         return j
+        
+    def set_inbound_rule_status(self, rule_id, enabled):
+        """
+        ::
+
+            PUT /:login/networks/:id/inbound/:rule_id
+
+        :param rule_id: id of the inbound port forwarding rule.
+        :type rule_id: :py:class:`basestring`
+        :param enabled: new status for the former inbound port forwarding rule.
+        :type enabled: :py:class:`bool`
+
+        :Returns: the updated inbound port forwarding rule status.
+        :rtype: :py:class:`bool`
+        """
+        assert isinstance(rule_id, basestring), "Illegal rule_id"
+        assert isinstance(enabled, bool), "Illegal status"
+        j, r = self.datacenter.request('PUT', self.path + '/inbound/' + rule_id,
+            data={ 'enabled': enabled })
+        r.raise_for_status()
+        return j['enabled']
+        
+    def get_outbound_rule_status(self, rule_id):
+        """
+        ::
+
+            GET /:login/networks/:id/inbound/:rule_id
+
+        :param rule_id: id of the inbound port forwarding rule.
+        :type rule_id: :py:class:`basestring`
+
+        :Returns: the current status of the specified inbound port
+            forwarding rule.
+        :rtype: :py:class:`bool`
+        """
+        assert isinstance(rule_id, basestring), "Illegal rule_id"
+        j, r = self.datacenter.request('GET', self.path + '/inbound/' + rule_id)
+        r.raise_for_status()
+        return j['enabled']
+        
+    def delete_inbound_rule(self, rule_id):
+        """
+        
+            DELETE /:login/networks/:id/inbound/:rule_id
+            
+        :param rule_id: id of the inbound port forwarding rule to delete.
+        :type rule_id: :py:class:`basestring`
+        """
+        assert isinstance(rule_id, basestring), "Illegal rule_id"
+        _, r = self.datacenter.request('DELETE', self.path + '/inbound/' + rule_id)
+        r.raise_for_status()
+        
+    def delete_all_inbound_rules(self):
+        """
+        
+            DELETE /:login/networks/:id/inbound/:rule_id
+
+        Deletes all inbound port forwarding rules of this network.            
+        """
+        for rule in self.get_inbound_rules():
+            _, r = self.datacenter.request('DELETE', self.path + '/inbound/' + \
+                    rule['id'])
+            r.raise_for_status()
 
